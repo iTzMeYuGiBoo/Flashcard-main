@@ -121,13 +121,14 @@ const QuizSetup = ({
               >
                 Gemini
               </button>
-              <button
+              {/* OpenAI/ChatGPT - Coming Soon */}
+              {/* <button
                 type="button"
                 className={`choice-btn ${selectedModel === 'openai' ? 'active' : ''}`}
                 onClick={() => setSelectedModel('openai')}
               >
                 ChatGPT
-              </button>
+              </button> */}
             </div>
           </div>
 

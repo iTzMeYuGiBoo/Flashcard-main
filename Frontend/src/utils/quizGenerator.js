@@ -36,7 +36,7 @@ const parseErrorMessage = (status, errorData) => {
 
 export const generateQuizQuestions = async (config) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/generate-quiz`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/generate`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -73,7 +73,7 @@ export const generateQuizQuestions = async (config) => {
 
 export const submitQuizAnswers = async (quizId, answers) => {
   try {
-    const response = await fetch(`${API_BASE_URL}/submit-quiz`, {
+    const response = await fetch(`${API_BASE_URL}/quiz/submit`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

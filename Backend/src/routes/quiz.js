@@ -13,6 +13,7 @@ quizRouter.post('/generate', async (req, res) => {
     questionTypes = [],
     expertiseLevel,
     model = 'gemini',
+    geminiModel,
     agentType = 'balanced',
   } = req.body;
 
@@ -34,6 +35,7 @@ quizRouter.post('/generate', async (req, res) => {
       questionTypes: safeTypes,
       expertiseLevel,
       model,
+      geminiModel,
       agentType,
     });
 

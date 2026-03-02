@@ -1,5 +1,5 @@
 import React from 'react';
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { HashRouter, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { ToastContainer } from 'react-toastify';
 import AppShell from './components/Layout/AppShell';
 import HomePage from './pages/HomePage';
@@ -46,9 +46,9 @@ const AppInner = () => {
 
 function App() {
   return (
-    <BrowserRouter>
+    <HashRouter>
       <AppInner />
-    </BrowserRouter>
+    </HashRouter>
   );
 }
 

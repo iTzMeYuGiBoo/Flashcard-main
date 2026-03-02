@@ -17,7 +17,6 @@ const QuizSetup = ({
 }) => {
   const [topic, setTopic] = useState(initialTopic || '');
   const [cardCount, setCardCount] = useState(10);
-  const [difficulty, setDifficulty] = useState('Medium');
   const [questionTypes, setQuestionTypes] = useState(['True/False', 'Single Select', 'Yes/No']);
   const [allowMultipleAnswers, setAllowMultipleAnswers] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -33,7 +32,6 @@ const QuizSetup = ({
     const config = {
       topic,
       cardCount,
-      difficulty,
       questionTypes: allowMultipleAnswers ? [...questionTypes, 'Multi-Select'] : questionTypes,
       allowMultipleAnswers,
       model: selectedModel,
@@ -93,23 +91,6 @@ const QuizSetup = ({
               />
               </div>
             </div>
-
-          <div className="form-field" style={{ marginTop:'24px' }}>
-            <div style={{ marginBottom:'8px', display: 'flex', flexDirection: 'column' }}>
-                <label style={{fontWeight:'500', fontSize:'0.875rem'}}>Difficulty Level</label>
-              </div>
-            <div className="difficulty-options">
-              {['Simple', 'Medium', 'Hard'].map((level) => (
-                <button
-                  key={level}
-                  onClick={() => setDifficulty(level)}
-                  className={`difficulty-btn ${difficulty === level ? 'active' : ''}`}
-                >
-                  {level}
-                </button>
-              ))}
-            </div>
-          </div>
 
           <div className="form-field" style={{ marginTop: '16px' }}>
             <div className="section-label">Model</div>

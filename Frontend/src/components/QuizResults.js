@@ -1,41 +1,15 @@
 import React, { useState } from 'react';
 import { CheckCircle, XCircle, Eye, RotateCcw, Trophy, Target } from 'lucide-react';
 
-const QuizResults = ({ questions, answers, config, onRetakeQuiz }) => {
+const QuizResults = ({ results, config, onRetakeQuiz }) => {
   const [expandedQuestions, setExpandedQuestions] = useState(new Set());
   const [view, setView] = useState('summary'); // 'summary' | 'details'
 
-  const calculateScore = () => {
-    let correct = 0;
-    questions.forEach((question, index) => {
-      const userAnswer = answers[index];
-      if (Array.isArray(question.correctAnswer)) {
-        if (
-          Array.isArray(userAnswer) &&
-          userAnswer.length === question.correctAnswer.length &&
-          userAnswer.every((ans) => question.correctAnswer.includes(ans))
-        ) {
-          correct++;
-        }
-      } else {
-        if (userAnswer === question.correctAnswer) {
-          correct++;
-        }
-      }
-    });
-    return { correct, total: questions.length, percentage: Math.round((correct / questions.length) * 100) };
-  };
+  if (!results) {
+    return <div>Loading results...</div>;
+  }
 
-  const isCorrect = (question, userAnswer) => {
-    if (Array.isArray(question.correctAnswer)) {
-      return (
-        Array.isArray(userAnswer) &&
-        userAnswer.length === question.correctAnswer.length &&
-        userAnswer.every((ans) => question.correctAnswer.includes(ans))
-      );
-    }
-    return userAnswer === question.correctAnswer;
-  };
+  const { score, correctCount, totalCount, results: questionResults } = results;
 
   const toggleExpanded = (index) => {
     const newExpanded = new Set(expandedQuestions);
@@ -47,11 +21,9 @@ const QuizResults = ({ questions, answers, config, onRetakeQuiz }) => {
     setExpandedQuestions(newExpanded);
   };
 
-  const score = calculateScore();
-
   const getScoreClass = () => {
-    if (score.percentage >= 80) return 'good';
-    if (score.percentage >= 60) return 'ok';
+    if (score >= 80) return 'good';
+    if (score >= 60) return 'ok';
     return 'bad';
   };
 
@@ -61,14 +33,13 @@ const QuizResults = ({ questions, answers, config, onRetakeQuiz }) => {
         <div className="summary-content">
           <Trophy className="icon large" />
           <h2>Quiz Complete!</h2>
-          <div className="percentage">{score.percentage}%</div>
-          <p>You scored {score.correct} out of {score.total} questions correctly</p>
+          <div className="percentage">{score}%</div>
+          <p>You scored {correctCount} out of {totalCount} questions correctly</p>
           <div className="summary-info">
             <div className="topic">
               <Target className="icon" />
               <span>Topic: {config.topic}</span>
             </div>
-            <div className="difficulty">Difficulty: {config.difficulty}</div>
           </div>
           <div style={{ margin: '1rem 0', display: 'flex', justifyContent: 'center', gap: '0.75rem' }}>
             <button
@@ -97,14 +68,12 @@ const QuizResults = ({ questions, answers, config, onRetakeQuiz }) => {
         <div className="detailed-review">
           <h3>Detailed Review</h3>
           <div className="review-list">
-            {questions.map((question, index) => {
-              const userAnswer = answers[index];
-              const correct = isCorrect(question, userAnswer);
+            {questionResults.map((result, index) => {
               const isExpanded = expandedQuestions.has(index);
               return (
                 <div key={index} className="review-item">
                   <div className="review-header">
-                    {correct ? (
+                    {result.isCorrect ? (
                       <CheckCircle className="icon success" />
                     ) : (
                       <XCircle className="icon error" />
@@ -112,51 +81,53 @@ const QuizResults = ({ questions, answers, config, onRetakeQuiz }) => {
                     <div className="review-body">
                       <div className="review-title">
                         <span>Question {index + 1}</span>
-                        <span className="type">{question.type}</span>
+                        <span className="type">{result.type}</span>
                       </div>
-                      <p className="question-text">{question.question}</p>
+                      <p className="question-text">{result.question}</p>
                       <div className="answers">
                         <div>
                           <p className="label">Your Answer:</p>
-                          <div className={correct ? 'answer correct' : 'answer wrong'}>
-                            {Array.isArray(userAnswer) ? userAnswer.join(', ') : userAnswer || 'No answer'}
+                          <div className={result.isCorrect ? 'answer correct' : 'answer wrong'}>
+                            {Array.isArray(result.userAnswer) 
+                              ? result.userAnswer.join(', ') 
+                              : result.userAnswer || 'No answer'}
                           </div>
                         </div>
-                        {!correct && (
+                        {!result.isCorrect && (
                           <div>
                             <p className="label">Correct Answer:</p>
                             <div className="answer correct">
                               {(() => {
-                                    const { correctAnswer, type } = question;
+                                const { correctAnswer, type } = result;
 
-                                    if (typeof correctAnswer === 'boolean') {
-                                      if (type === 'Yes/No') return correctAnswer ? 'Yes' : 'No';
-                                      return correctAnswer ? 'True' : 'False';
-                                    }
+                                if (typeof correctAnswer === 'boolean') {
+                                  if (type === 'Yes/No') return correctAnswer ? 'Yes' : 'No';
+                                  return correctAnswer ? 'True' : 'False';
+                                }
 
-                                    if (typeof correctAnswer === 'string') {
-                                      const normalized = correctAnswer.toLowerCase();
-                                      if (type === 'Yes/No') {
-                                        if (normalized === 'yes') return 'Yes';
-                                        if (normalized === 'no') return 'No';
-                                      } else {
-                                        if (normalized === 'true') return 'True';
-                                        if (normalized === 'false') return 'False';
-                                      }
-                                      return correctAnswer;
-                                    }
+                                if (typeof correctAnswer === 'string') {
+                                  const normalized = correctAnswer.toLowerCase();
+                                  if (type === 'Yes/No') {
+                                    if (normalized === 'yes') return 'Yes';
+                                    if (normalized === 'no') return 'No';
+                                  } else {
+                                    if (normalized === 'true') return 'True';
+                                    if (normalized === 'false') return 'False';
+                                  }
+                                  return correctAnswer;
+                                }
 
-                                    if (Array.isArray(correctAnswer)) {
-                                      return correctAnswer.join(', ');
-                                    }
+                                if (Array.isArray(correctAnswer)) {
+                                  return correctAnswer.join(', ');
+                                }
 
-                                    return 'No answer';
-                                })()}
+                                return 'No answer';
+                              })()}
                             </div>
                           </div>
                         )}
                       </div>
-                      {question.explanation && (
+                      {result.explanation && (
                         <div className="explanation">
                           <button onClick={() => toggleExpanded(index)} className="toggle">
                             <Eye className="icon" />
@@ -164,7 +135,7 @@ const QuizResults = ({ questions, answers, config, onRetakeQuiz }) => {
                           </button>
                           {isExpanded && (
                             <div className="explanation-text">
-                              <p><strong>Explanation:</strong> {question.explanation}</p>
+                              <p><strong>Explanation:</strong> {result.explanation}</p>
                             </div>
                           )}
                         </div>

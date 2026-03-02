@@ -54,14 +54,47 @@ export const generateQuizQuestions = async (config) => {
       throw new Error(userFriendlyMessage);
     }
 
-    const cards = await response.json();
+    const data = await response.json();
 
-    return cards.map((card, index) => ({
-      ...card,
-      id: `card-${index + 1}`,
-    }));
+    // Backend now returns { quizId, questions }
+    // Questions no longer contain answers or explanations
+    return {
+      quizId: data.quizId,
+      questions: data.questions.map((card, index) => ({
+        ...card,
+        id: card.id || `card-${index + 1}`,
+      })),
+    };
   } catch (err) {
     console.error('Quiz generation failed:', err);
+    throw err;
+  }
+};
+
+export const submitQuizAnswers = async (quizId, answers) => {
+  try {
+    const response = await fetch(`${API_BASE_URL}/submit-quiz`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        quizId,
+        answers,
+      }),
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      const userFriendlyMessage = parseErrorMessage(response.status, errorData);
+      toast.error(userFriendlyMessage);
+      throw new Error(userFriendlyMessage);
+    }
+
+    const results = await response.json();
+    return results;
+  } catch (err) {
+    console.error('Quiz submission failed:', err);
     throw err;
   }
 };

@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight, CheckCircle } from 'lucide-react';
 import QuizSetup from './QuizSetup';
 import QuizQuestion from './QuizQuestion';
 import QuizResults from './QuizResults';
-import { generateQuizQuestions } from '../utils/quizGenerator.js';
+import { generateQuizQuestions, submitQuizAnswers } from '../utils/quizGenerator.js';
 
 const QuizMode = ({
   initialTopic,
@@ -16,10 +16,14 @@ const QuizMode = ({
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [answers, setAnswers] = useState({});
   const [quizConfig, setQuizConfig] = useState(null);
+  const [quizId, setQuizId] = useState(null);
+  const [quizResults, setQuizResults] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleStartQuiz = async (config) => {
     setQuizConfig(config);
-    const generatedQuestions = await generateQuizQuestions(config);
+    const { quizId: newQuizId, questions: generatedQuestions } = await generateQuizQuestions(config);
+    setQuizId(newQuizId);
     setQuestions(generatedQuestions);
     setCurrentQuestionIndex(0);
     setAnswers({});
@@ -41,8 +45,29 @@ const QuizMode = ({
     setCurrentQuestionIndex((prev) => Math.min(questions.length - 1, prev + 1));
   };
 
-  const handleSubmitQuiz = () => {
-    setQuizState('results');
+  const handleSubmitQuiz = async () => {
+    if (!quizId) {
+      console.error('No quiz ID available');
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      // Convert answers from index-based to question ID-based
+      const answersById = {};
+      questions.forEach((question, index) => {
+        answersById[question.id] = answers[index];
+      });
+
+      // Submit to backend for verification
+      const results = await submitQuizAnswers(quizId, answersById);
+      setQuizResults(results);
+      setQuizState('results');
+    } catch (error) {
+      console.error('Error submitting quiz:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleRetakeQuiz = () => {
@@ -51,6 +76,8 @@ const QuizMode = ({
     setCurrentQuestionIndex(0);
     setAnswers({});
     setQuizConfig(null);
+    setQuizId(null);
+    setQuizResults(null);
   };
 
   const renderQuizState = () => {
@@ -110,8 +137,12 @@ const QuizMode = ({
               </div>
 
               {allAnswered && (
-                <button onClick={handleSubmitQuiz} className="btn-green">
-                  Submit Quiz
+                <button 
+                  onClick={handleSubmitQuiz} 
+                  className="btn-green"
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Submitting...' : 'Submit Quiz'}
                 </button>
               )}
 
@@ -130,8 +161,7 @@ const QuizMode = ({
       case 'results':
         return (
           <QuizResults
-            questions={questions}
-            answers={answers}
+            results={quizResults}
             config={quizConfig}
             onRetakeQuiz={handleRetakeQuiz}
           />

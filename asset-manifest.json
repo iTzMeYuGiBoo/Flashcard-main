@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/Flashcard-main/static/css/main.24675a20.css",
-    "main.js": "/Flashcard-main/static/js/main.ebe2a177.js",
+    "main.js": "/Flashcard-main/static/js/main.1960306d.js",
     "index.html": "/Flashcard-main/index.html",
     "main.24675a20.css.map": "/Flashcard-main/static/css/main.24675a20.css.map",
-    "main.ebe2a177.js.map": "/Flashcard-main/static/js/main.ebe2a177.js.map"
+    "main.1960306d.js.map": "/Flashcard-main/static/js/main.1960306d.js.map"
   },
   "entrypoints": [
     "static/css/main.24675a20.css",
-    "static/js/main.ebe2a177.js"
+    "static/js/main.1960306d.js"
   ]
 }

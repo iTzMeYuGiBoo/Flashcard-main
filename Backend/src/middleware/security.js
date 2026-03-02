@@ -174,17 +174,24 @@ export function getCorsOptions() {
   ].filter(Boolean);
 
   return {
-    origin: (origin, callback) => {
+    origin: function (origin, callback) {
       // Allow requests with no origin (like mobile apps or Postman)
-      if (!origin || allowedOrigins.includes(origin)) {
+      if (!origin) {
+        return callback(null, true);
+      }
+      
+      if (allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
+        console.warn(`CORS origin blocked: ${origin}`);
         callback(new Error('CORS: Origin not allowed'));
       }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'OPTIONS'],
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization'],
+    exposedHeaders: ['Content-Length', 'X-JSON-Response'],
     maxAge: 86400, // 24 hours
+    preflightContinue: false,
   };
 }

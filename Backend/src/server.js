@@ -20,11 +20,11 @@ const app = express();
 
 // ── SECURITY MIDDLEWARE ──────────────────────────────────────────────────
 
+// CORS: Restrict cross-origin requests to allowed origins (MUST be before helmet)
+app.use(cors(getCorsOptions()));
+
 // Helmet: Set security HTTP headers
 app.use(helmet());
-
-// CORS: Restrict cross-origin requests to allowed origins
-app.use(cors(getCorsOptions()));
 
 // Body parser with size limit to prevent DoS attacks
 app.use(requestSizeLimit);
